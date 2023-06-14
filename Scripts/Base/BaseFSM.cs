@@ -2,7 +2,7 @@
  * @Author: edR && pkq3344520@gmail.com
  * @Date: 2023-04-14 22:00:29
  * @LastEditors: edR && pkq3344520@gmail.com
- * @LastEditTime: 2023-04-15 12:08:26
+ * @LastEditTime: 2023-06-14 21:16:27
  * @Description: 状态机基类
  */
 
@@ -10,7 +10,7 @@
 using System;
 using System.Collections.Generic;
 
-public class BaseFSM<TState> : IFSM<TState>
+public abstract class BaseFSM<TState> : IFSM<TState>
 {
     bool IState.HasExitTime { get; set; }
     TState IFSM<TState>.InitialState { get; set; }
@@ -38,6 +38,7 @@ public class BaseFSM<TState> : IFSM<TState>
             throw new DuplicateStateException("状态重复添加:" + stateType.ToString());
         }
         state.StateName = stateType.ToString();
+        state.Init();
         stateDic.Add(stateType, state);
     }
 
@@ -55,6 +56,12 @@ public class BaseFSM<TState> : IFSM<TState>
         }
         transitionDic[from].Add(t);
     }
+
+    public void AddAnyTransition(TState to, Func<bool> condition, bool immediately)
+    {
+        BaseTransition<TState> t = new BaseTransition<TState>(to, to, condition, immediately);
+        anyStatetransitionList.Add(t);
+    }
     #endregion
 
     public void Init()
@@ -70,6 +77,7 @@ public class BaseFSM<TState> : IFSM<TState>
         self.CanExit = self.HasExitTime ? false : true;
         CurStateName = runningState.StateName;
         PreStateName = "None";
+        runningState.Enter();
         OnEnter();
     }
 
