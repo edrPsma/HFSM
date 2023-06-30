@@ -111,6 +111,7 @@ public abstract class BaseFSM<TState> : IFSM<TState>
         foreach (var item in anyStatetransitionList)
         {
             if (!item.Immediately && !runningState.CanExit) continue;
+            if (item.To.ToString() == CurStateName) continue;
             if (item.Condition != null && item.Condition.Invoke())
             {
                 SetTransition(item.To);
